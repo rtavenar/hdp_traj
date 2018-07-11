@@ -1,5 +1,6 @@
 import json
 import csv
+import numpy
 from gensim.corpora import Dictionary
 
 __author__ = 'Romain Tavenard romain.tavenard[at]univ-rennes2.fr'
@@ -15,6 +16,15 @@ def read_traj_synthetic(fname):
     for obs in csv.DictReader(open(fname, "r", encoding="utf-8"), delimiter=";"):
         traj_csv.append(obs)
     return traj_csv
+
+
+def topic2npy(model, topic_id, dictionary, n_words=10):
+    vocabulary_size = len(dictionary)
+    lst = model.show_topic(topic_id=topic_id, topn=n_words)
+    npy_arr = numpy.zeros((vocabulary_size, ))
+    for word, proba in lst:
+        npy_arr[dictionary.token2id[word]] = proba
+    return npy_arr
 
 
 class ObsQuantizer:
@@ -54,12 +64,13 @@ class ObsQuantizer:
             doc_list.append(word)
         return self.dictionary.doc2bow(document=doc_list)
 
-
     def fit(self, corpus):
         corpus_gensim = []
         for doc in corpus:
             corpus_gensim.append(self.fit_one_doc(doc))
         return corpus_gensim
+
+
 
 
 
